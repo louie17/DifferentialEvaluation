@@ -24,6 +24,54 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="de_constraints.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="de_types.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="differential_evolution.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="individual.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="listener.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="multithread.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="mutation_strategy.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="population.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="processors.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="random_generator.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="selection_strategy.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="termination_strategy.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ud_string.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="objective_function.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="boost_noncopyable.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="boost_threadgroup.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

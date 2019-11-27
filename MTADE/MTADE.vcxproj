@@ -22,7 +22,7 @@
     <ProjectGuid>{2DDFB890-3D97-42DC-B48A-AE2855D81F44}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>MTADE</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -71,6 +71,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <CodeAnalysisRuleSet>D:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -88,6 +90,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -145,8 +148,24 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="boost_noncopyable.hpp" />
+    <ClInclude Include="boost_threadgroup.hpp" />
+    <ClInclude Include="de_constraints.hpp" />
+    <ClInclude Include="de_types.hpp" />
+    <ClInclude Include="differential_evolution.hpp" />
+    <ClInclude Include="individual.hpp" />
+    <ClInclude Include="listener.hpp" />
+    <ClInclude Include="multithread.hpp" />
+    <ClInclude Include="mutation_strategy.hpp" />
+    <ClInclude Include="objective_function.h" />
+    <ClInclude Include="population.hpp" />
+    <ClInclude Include="processors.hpp" />
+    <ClInclude Include="random_generator.hpp" />
+    <ClInclude Include="selection_strategy.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="termination_strategy.hpp" />
+    <ClInclude Include="ud_string.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MTADE.cpp" />
