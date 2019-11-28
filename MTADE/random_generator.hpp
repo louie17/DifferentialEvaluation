@@ -14,21 +14,21 @@
 namespace de
 {
 
-inline double genrand( double min = 0, double max = 1 )
-{
-	static std::mt19937 gen;
-	std::uniform_real_distribution<> dist( min, max );
-	
-	return dist(gen);
-}
+	inline double genrand(double min = 0, double max = 1)
+	{
+		static std::mt19937 gen;
+		std::uniform_real_distribution<> dist(min, max);
 
-inline int genintrand( double min, double max, bool upperexclusive = false )
-{
-	assert( min < max );
-	int ret = 0;
-	do ret = std::round( genrand( min, max ) ); while( ret < min || ret > max || upperexclusive && ret == max );
-	return ret; 
-}
+		return dist(gen);
+	}
+
+	inline int genintrand(double min, double max, bool upperexclusive = false)
+	{
+		assert(min < max);
+		int ret = 0;
+		do ret = std::round(genrand(min, max)); while (ret < min || ret > max || upperexclusive && ret == max);
+		return ret;
+	}
 
 }
 

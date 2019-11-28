@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 		/**
 		* Print out the result
 		*/
-		std::cout << "minimum value for the " << /*of->name() << */" is " << best->cost() << " for x=" << (*best->vars())[0] << ", y=" << (*best->vars())[1]<<std::endl;
+		std::cout << "minimum value for the " << /*of->name() << */" is " << best->cost() << " for x=" << (*best->vars())[0] << ", y=" << (*best->vars())[1] << std::endl;
 	}
 	catch (const de::exception& e)
 	{
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 		*/
 		std::cout << "an error occurred: " << e.what();
 	}
-	
-    return 0;
+
+	return 0;
 }
 
