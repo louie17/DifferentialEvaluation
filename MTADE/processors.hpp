@@ -220,7 +220,7 @@ namespace de
 	public:
 		// \cond
 		typedef T  value_type;
-		static double run(T t, de::DVectorPtr vars) { return t(vars); }
+		static double run(T t, de::NVectorPtr vars) { return t(vars); }
 		static T make(T t) { return t; }
 		// \endcond
 	};
@@ -235,7 +235,7 @@ namespace de
 	public:
 		// \cond
 		typedef T*  value_type;
-		static double run(value_type t, de::DVectorPtr vars) { return (*t)(vars); }
+		static double run(value_type t, de::NVectorPtr vars) { return (*t)(vars); }
 		static value_type make(value_type t) { return t; }
 		// \endcond
 	};
@@ -250,7 +250,7 @@ namespace de
 	public:
 		// \cond
 		typedef std::shared_ptr< T > value_type;
-		static double run(value_type t, de::DVectorPtr vars) { return (*t)(vars); }
+		static double run(value_type t, de::NVectorPtr vars) { return (*t)(vars); }
 		static value_type make(value_type t) { return t; }
 		// \endcond
 	};
@@ -265,7 +265,7 @@ namespace de
 	public:
 		// \cond
 		typedef std::shared_ptr< T > value_type;
-		static double run(value_type t, de::DVectorPtr vars) { return (*t)(vars); }
+		static double run(value_type t, de::NVectorPtr vars) { return (*t)(vars); }
 		static value_type make(objective_function_factory< T >* off) { return off->make(); }
 		// \endcond
 	};
@@ -279,7 +279,7 @@ namespace de
 	public:
 		// \cond
 		typedef std::shared_ptr< T > value_type;
-		static double run(value_type t, de::DVectorPtr vars) { return (*t)(vars); }
+		static double run(value_type t, de::NVectorPtr vars) { return (*t)(vars); }
 		static value_type make(std::shared_ptr< objective_function_factory< T > > off) { return off->make(); }
 		// \endcond
 	};
@@ -294,7 +294,7 @@ namespace de
 	public:
 		// \cond
 		typedef std::shared_ptr< T > value_type;
-		static double run(value_type t, de::DVectorPtr vars) { return (*t)(vars); }
+		static double run(value_type t, de::NVectorPtr vars) { return (*t)(vars); }
 		static value_type make(objective_function_factory< T >& off) { return off.make(); }
 		// \endcond
 	};

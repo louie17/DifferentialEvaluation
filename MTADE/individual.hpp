@@ -32,7 +32,7 @@ namespace de
 	class individual
 	{
 	private:
-		de::DVectorPtr m_vars;
+		de::NVectorPtr m_vars;
 		double m_cost;
 		de::mutex m_mx;
 
@@ -45,7 +45,7 @@ namespace de
 		 * @param varCount 每个个体的变量的数量
 		 */
 		individual(size_t varCount)
-			: m_vars(std::make_shared< de::DVector >(varCount))
+			: m_vars(std::make_shared< de::NVector >(varCount))
 		{
 		}
 
@@ -56,8 +56,8 @@ namespace de
 		 *
 		 * @param vars 将被复制到内部变量vector容器中的变量vector容器对象。
 		 */
-		individual(const de::DVector& vars)
-			: m_vars(std::make_shared< de::DVector >(vars))
+		individual(const de::NVector& vars)
+			: m_vars(std::make_shared< de::NVector >(vars))
 		{
 		}
 
@@ -74,8 +74,13 @@ namespace de
 			assert(m_vars);
 			assert(m_vars->size() == constraints->size());
 
-			for (de::DVector::size_type j = 0; j < m_vars->size(); ++j)
-				(*m_vars)[j] = constraints->get_rand_value(j);
+			for (de::NVector::size_type j = 0; j < m_vars->size(); ++j)
+			{
+				(*m_vars)[j].setAltitude(constraints->get_rand_value(0));
+				(*m_vars)[j].setLatitude(constraints->get_rand_value(1));
+				(*m_vars)[j].setLongitude(constraints->get_rand_value(2));
+			}
+				
 		}
 
 		/**
@@ -95,16 +100,18 @@ namespace de
 		 * @param constraints
 		 * @param origin
 		 */
-		void ensureConstraints(constraints_ptr constraints, de::DVectorPtr origin)
+		void ensureConstraints(constraints_ptr constraints, de::NVectorPtr origin)
 		{
 			assert(constraints);
 			assert(m_vars);
 			assert(origin);
-			assert(m_vars->size() == constraints->size());
+			//assert(m_vars->size() == constraints->size());
 
-			for (de::DVector::size_type j = 0; j < m_vars->size(); ++j)
+			for (de::NVector::size_type j = 0; j < m_vars->size(); ++j)
 			{
-				(*m_vars)[j] = constraints->get_rand_value(j, (*m_vars)[j], (*origin)[j]);
+				(*m_vars)[j].setAltitude(constraints->get_rand_value(0, (*m_vars)[j].altitude(), (*origin)[j].altitude()));
+				(*m_vars)[j].setLatitude(constraints->get_rand_value(1, (*m_vars)[j].latitude(), (*origin)[j].latitude()));
+				(*m_vars)[j].setLongitude(constraints->get_rand_value(2, (*m_vars)[j].longitude(), (*origin)[j].longitude()));
 			}
 		}
 
@@ -115,7 +122,7 @@ namespace de
 		 *
 		 * @return de::DVectorPtr
 		 */
-		de::DVectorPtr vars() const { return m_vars; }
+		de::NVectorPtr vars() const { return m_vars; }
 
 		/**
 		 * 根据索引返回对变量值的非常量引用，该索引可用作左值。
@@ -124,9 +131,9 @@ namespace de
 		 *
 		 * @param index 要返回其引用的变量的索引
 		 *
-		 * @return de::Double&
+		 * @return de::Node&
 		 */
-		de::Double& operator[](size_t index) { return (*m_vars)[index]; }
+		de::Node& operator[](size_t index) { return (*m_vars)[index]; }
 
 		/**
 		 * 根据索引返回对变量值的常量引用，该索引可用作左值。
@@ -135,9 +142,9 @@ namespace de
 		 *
 		 * @param index 要返回其引用的变量的索引
 		 *
-		 * @return de::Double&
+		 * @return de::Node&
 		 */
-		const de::Double& operator[](size_t index) const { return (*m_vars)[index]; }
+		const de::Node& operator[](size_t index) const { return (*m_vars)[index]; }
 
 		/**
 		 * 设定代价
@@ -222,7 +229,7 @@ namespace de
 		size_t size() const { return m_vars->size(); }
 
 		/**
-		 * 以字符串的形式返回个体内部的（代价和变量列表）。
+		 * 以字符串的形式返回个体内部的（代价和节点列表）。
 		 *
 		 * @author louiehan (11/11/2019)
 		 *
@@ -232,11 +239,11 @@ namespace de
 		{
 			std::ostringstream os;
 
-			os << "cost: " << cost() << ", vars: ";
+			os << "cost: " << cost() << ", Nodes: ";
 
-			for (de::DVector::size_type j = 0; j < m_vars->size(); ++j)
+			for (de::NVector::size_type j = 0; j < m_vars->size(); ++j)
 			{
-				os << (*m_vars)[j] << ", ";
+				os << (*m_vars)[j].altitude() << ", "<< (*m_vars)[j].latitude()<<", "<< (*m_vars)[j].longitude()<< "\t";
 			}
 
 			return os.str();

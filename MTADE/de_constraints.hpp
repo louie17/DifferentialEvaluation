@@ -373,7 +373,7 @@ namespace de
 		class unique : public std::unary_function < Double, bool >
 		{
 		public:
-			bool operator ()(Double d) const
+			bool operator()(Double d) const
 			{
 				return m_unique.insert(d).second;
 			}

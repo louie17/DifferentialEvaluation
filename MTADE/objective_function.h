@@ -8,9 +8,11 @@
 #endif
 
 #include <memory>
+#include <cmath>
 
 #include "de_types.hpp"
 #include "processors.hpp"
+#include "de_constraints.hpp"
 
 /**
 * 具体目标函数的抽象基类。
@@ -104,13 +106,69 @@ public:
 	{
 	}
 
-	virtual double operator()(de::DVectorPtr args)
+	double evaluation_length_cost(de::NVectorPtr args, de::constraint_ptr high_constraint)
 	{
-		double x = (*args)[0];
-		double y = (*args)[1];
-		double z = (*args)[2];
+		double cost=0;
+		std::vector<double> norms(args->size()-1,0);
 
-		return pow(x, 3) + pow(y, 3) + pow(z, 3);
+		for (size_t i = 0; i <args->size() - 1; i++)
+		{
+			norms[i]= ((*args)[i + 1] - (*args)[i]).norm();
+		}
+
+		for (auto iter:norms)
+		{
+			cost += iter;
+		}
+
+		return cost;
+	}
+
+	double evaluation_variance_cost(de::NVectorPtr args, de::constraint_ptr high_constraint)
+	{
+		double cost;
+
+		return cost;
+	}
+
+	//由于暂时没有地形信息，这里只进行与最低安全飞行高度和两个相邻点的高度进行比较
+	double evaluation_route_height(de::NVectorPtr args, de::constraint_ptr high_constraint)
+	{
+		double cost;
+
+		return cost;
+	}
+
+	double evaluation_route_mission_cost(de::NVectorPtr args, de::constraint_ptr constraints)
+	{
+		double cost;
+		return cost;
+	}
+
+	double evaluation_route_survival_cost(de::NVectorPtr args, de::constraint_ptr constraints)
+	{
+		double cost;
+		return cost;
+	}
+
+	virtual double operator()(de::NVectorPtr args,de::constraints_ptr constraints)
+	{
+		//double x = (*args)[0].getLongitude();
+		//double y = (*args)[0].getLatitude(); 
+		//double z = (*args)[0].getAltitude();
+
+		// 评估飞行高度和地形
+		double height_cost = evaluation_route_height(args,(*constraints)[3]);
+		// 评估与任务点的距离
+		double mission_cost = evaluation_route_mission_cost(args, (*constraints)[4]);
+		// 评估生存代价
+		double survival_cost = evaluation_route_survival_cost(args, (*constraints)[5]);
+		//评估长度代价
+		double length_cost;
+		// 适应度
+		double cost = 0.1*length_cost + 0.5*survival_cost + 0.3*mission_cost + 0.1*height_cost;
+
+		return cost;
 	}
 
 };

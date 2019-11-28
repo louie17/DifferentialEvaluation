@@ -24,9 +24,9 @@ int main(int argc, char *argv[])
 		* 然后将目标函数中的两个参数设置为实数类型：-10<=x<=10,-100<=y<=100.
 		*/
 		constraints_ptr constraints(std::make_shared< constraints >(VARS_COUNT, 1.0e-6, 1.0e6));
-		(*constraints)[0] = std::make_shared< real_constraint >(-10, 10);//width
-		(*constraints)[1] = std::make_shared< real_constraint >(-100, 100);//depth
-		(*constraints)[2] = std::make_shared< real_constraint >(-100, 100);//heigth
+		(*constraints)[0] = std::make_shared< real_constraint >(0, 100);//width
+		(*constraints)[1] = std::make_shared< real_constraint >(0, 100);//depth
+		(*constraints)[2] = std::make_shared< real_constraint >(0, 20);//heigth
 
 		/**
 		* 实例化目标函数
