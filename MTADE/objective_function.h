@@ -74,11 +74,11 @@ typedef std::shared_ptr< objective_function > objective_function_ptr;
 *
 * f(x,y) = x^2 + y^2
 */
-class sphere_function:public objective_function
+class sphere_function :public objective_function
 {
 public:
 	sphere_function()
-		: objective_function( "sphere function" )
+		: objective_function("sphere function")
 	{
 	}
 
@@ -110,7 +110,7 @@ public:
 		double y = (*args)[1];
 		double z = (*args)[2];
 
-		return pow(x,3) + pow(y,3)+ pow(z,3);
+		return pow(x, 3) + pow(y, 3) + pow(z, 3);
 	}
 
 };

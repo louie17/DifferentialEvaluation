@@ -13,8 +13,8 @@
 
 namespace de
 {
-typedef std::recursive_mutex mutex;
-typedef std::lock_guard< std::recursive_mutex > lock;
+	typedef std::recursive_mutex mutex;
+	typedef std::lock_guard< std::recursive_mutex > lock;
 
 }
 
