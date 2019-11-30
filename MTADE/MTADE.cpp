@@ -28,6 +28,13 @@ int main(int argc, char *argv[])
 		(*constraints)[1] = std::make_shared< real_constraint >(0, 100);//depth
 		(*constraints)[2] = std::make_shared< real_constraint >(0, 20);//heigth
 
+		(*constraints)[3] = std::make_shared< real_constraint >(0, 90);//yaw angle
+		(*constraints)[4] = std::make_shared< real_constraint >(0, 90);//pitching angle
+		(*constraints)[5] = std::make_shared< real_constraint >(0, 90);//rolling angle
+
+		(*constraints)[6] = std::make_shared< real_constraint >(0, 100);//oil
+
+
 		/**
 		* 实例化目标函数
 		*
@@ -80,7 +87,11 @@ int main(int argc, char *argv[])
 		/**
 		* Print out the result
 		*/
-		std::cout << "minimum value for the " << /*of->name() << */" is " << best->cost() << " for x=" << (*best->vars())[0] << ", y=" << (*best->vars())[1] << std::endl;
+		//std::cout << "minimum value for the " << /*of->name() << */" is " << best->cost() << " for x=" << (*best->vars())[0] << ", y=" << (*best->vars())[1] << std::endl;
+		std::cout << "minimum value for the " << /*of->name() << */" is " << best->cost() 
+			<< " for x=" << (*best->vars())[0].longitude() 
+			<< ", y=" << (*best->vars())[1].latitude()
+			<< ", y=" << (*best->vars())[1].altitude() << std::endl;
 	}
 	catch (const de::exception& e)
 	{

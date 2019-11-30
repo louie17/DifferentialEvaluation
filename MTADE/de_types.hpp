@@ -79,6 +79,7 @@ namespace de
 	*/
 	class Node
 	{
+		friend bool operator==(const Node&, const Node&);
 	public:
 		Node()
 			:m_altitude(0), m_latitude(0), m_longitude(0)
@@ -107,7 +108,7 @@ namespace de
 		}
 
 		/**
-		* 重载赋值运算符
+		* 重载赋值运算符=
 		*
 		* @author louiehan (11/11/2019)
 		*
@@ -115,7 +116,7 @@ namespace de
 		*
 		* @return *this 返回对当前节点的引用
 		*/
-		Node &operator=(const Node& node)
+		Node& operator=(const Node& node)
 		{
 			m_altitude = node.m_altitude;
 			m_latitude = node.m_latitude;
@@ -123,7 +124,12 @@ namespace de
 			return *this;
 		}
 
-		double norm() const { return sqrt(pow(m_altitude, 2) + pow(m_latitude, 2) + pow(m_longitude, 2)); }
+		// operations on Node objects
+		// member binary operator: left-hand operand bound to implicit this pointer
+		Node& operator+=(const Node&);
+		Node& operator*(double times);
+
+		double norm() const { return sqrt(m_altitude*m_altitude + m_latitude*m_latitude + m_longitude*m_longitude); }
 
 		double altitude() const { return m_altitude; }
 		double latitude() const { return m_latitude; }
@@ -139,8 +145,45 @@ namespace de
 		double m_longitude;
 	};
 
+	inline bool operator==(const Node &pnode, const Node &lnode)
+	{
+		// must be made a friend of Node
+		return pnode.m_altitude == lnode.m_altitude &&
+			pnode.m_latitude==lnode.m_latitude &&
+			pnode.m_longitude==lnode.m_longitude;
+	}
+
+	inline bool operator!=(const Node &pnode, const Node &lnode)
+	{
+		return !(pnode == lnode);
+	}
+
+	Node& Node::operator+=(const Node &node)
+	{
+		m_altitude += node.m_altitude;
+		m_latitude += node.m_latitude;
+		m_longitude += node.m_longitude;
+		return *this;
+	}
+
 	/**
-	* 重载运算符-
+	* 重载加法运算符+
+	*
+	* @author louiehan (11/11/2019)
+	*
+	* @param pnode,lnode 相减的两个节点
+	*
+	* @return node 返回向量和
+	*/
+	Node operator+(const Node &pnode, const Node &lnode)
+	{
+		Node node(pnode);
+		node += lnode;
+		return node;
+	}
+
+	/**
+	* 重载减法运算符-
 	*
 	* @author louiehan (11/11/2019)
 	*
@@ -155,6 +198,28 @@ namespace de
 		node.setLatitude(pnode.latitude() - lnode.latitude());
 		node.setLongitude(pnode.longitude() - lnode.longitude());
 		return node;
+	}
+
+	Node& Node::operator*(double times)
+	{
+		m_altitude *= times;
+		m_latitude *= times;
+		m_longitude *= times;
+		return *this;
+	}
+
+	/**
+	* 重载乘法运算符*
+	*
+	* @author louiehan (11/11/2019)
+	*
+	* @param pnode,lnode 相乘的两个节点
+	*
+	* @return *this
+	*/
+	double operator*(const Node &pnode, const Node &lnode)
+	{
+		return pnode.altitude() * lnode.altitude() + pnode.latitude() * lnode.latitude() + pnode.longitude() * lnode.longitude();
 	}
 
 	/**

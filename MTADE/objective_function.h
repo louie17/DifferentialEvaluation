@@ -9,15 +9,21 @@
 
 #include <memory>
 #include <cmath>
+#include <numeric>
+#include <algorithm>
+#include <iterator>
+#include <valarray>
 
 #include "de_types.hpp"
 #include "processors.hpp"
 #include "de_constraints.hpp"
 
+#define PI 3.14159265
+
 /**
 * 具体目标函数的抽象基类。
 *
-* @author louiehan (11/12/2019)
+* @author louiehan (11/18/2019)
 */
 class objective_function
 {
@@ -27,7 +33,7 @@ public:
 	/**
 	* constructs an objective_function object
 	*
-	* @author louiehan (11/12/2019)
+	* @author louiehan (11/18/2019)
 	*
 	* @param name the objective function name
 	*/
@@ -47,7 +53,7 @@ public:
 	* 则将约束向量的前两个元素设置为两个变量的约束，并在目标函数operator（）中使用
 	* args向量的前两个值作为两个变量。可以忽略此向量中的所有其他值。
 	*
-	* @author louiehan (11/12/2019)
+	* @author louiehan (11/18/2019)
 	*
 	* @param args 参数向量。向量通常比目标函数使用的变量数大得多，
 	*			  因此目标函数of只取向量中的前n个值，而忽略其余的值。
@@ -59,7 +65,7 @@ public:
 	/**
 	* An objective function has a name
 	*
-	* @author louiehan (11/12/2019)
+	* @author louiehan (11/18/2019)
 	*
 	* @return const std::string&
 	*/
@@ -106,33 +112,94 @@ public:
 	{
 	}
 
-	double evaluation_length_cost(de::NVectorPtr args, de::constraint_ptr high_constraint)
+	/**
+	* 计算路径总长度
+	* 
+	* @author louie (11/28/2019)
+	*
+	*/
+	void evaluation_length_cost(const std::valarray<double> &norms, double &length_cost)
 	{
-		double cost=0;
-		std::vector<double> norms(args->size()-1,0);
-
-		for (size_t i = 0; i <args->size() - 1; i++)
-		{
-			norms[i]= ((*args)[i + 1] - (*args)[i]).norm();
-		}
-
 		for (auto iter:norms)
 		{
-			cost += iter;
+			length_cost += iter;
 		}
 
-		return cost;
 	}
 
-	double evaluation_variance_cost(de::NVectorPtr args, de::constraint_ptr high_constraint)
+	void evaluation_std_variance_cost(const std::valarray<double> &norms, double &std_variance_cost)
 	{
-		double cost;
+		double sum = norms.sum();
+		double mean = sum / norms.size(); //均值  
 
-		return cost;
+		double accum = 0.0;
+		for(auto d:norms) {
+			accum += (d - mean)*(d - mean);
+		}
+
+		std_variance_cost = sqrt(accum / (norms.size() - 1)); //标准差
+	}
+
+	void evalution_turn_angle_cost(const de::NVector &diff_vector, const std::valarray<double> &norms, double &angle_cost)
+	{
+		//向量夹角
+		std::valarray<double> vetorial_angle(0.0,diff_vector.size()-1);
+		//偏航角yaw angle
+		std::valarray<double> yaw_angles(0.0, diff_vector.size() - 1);
+		//俯仰角pitching angle
+		std::valarray<double> pitching_angles(0.0, diff_vector.size() - 1);
+		//滚动角rolling angle
+		std::valarray<double> rolling_angles(0.0, diff_vector.size() - 1);
+
+
+		for (size_t i = 0; i < diff_vector.size()-1; i++)
+		{
+			double tmp=diff_vector[i] * diff_vector[i + 1] / (norms[i] * norms[i + 1]);
+			de::Node tmpNode = diff_vector[i + 1] - diff_vector[i];
+			//以经度轴为参考轴
+			if (tmpNode.altitude()==0.0 && tmpNode.longitude()==0.0)
+			{
+				pitching_angles[i] = 0;
+			}
+			else
+			{
+				pitching_angles[i] = atan2(tmpNode.altitude(), tmpNode.longitude())*180.0 / PI;
+			}
+
+			if (tmpNode.latitude()==0.0 && tmpNode.altitude()==0.0)
+			{
+				rolling_angles[i] = 0;
+			}
+			else
+			{
+				rolling_angles[i] = atan2(tmpNode.latitude(), tmpNode.altitude())*180.0 / PI;
+			}
+
+			if (tmpNode.latitude()==0.0 && tmpNode.longitude()==0.0)
+			{
+				yaw_angles[i] = 0;
+			}
+			else
+			{
+				yaw_angles[i] = atan2(tmpNode.latitude(), tmpNode.longitude())*180.0 / PI;
+			} 
+						
+			if ( tmp>=0 && tmp <= 1 )
+			{
+				vetorial_angle[i] = acos(tmp) * 180.0 / PI;
+			}
+			else
+			{ 
+				vetorial_angle[i] = (tmp>1) ? 0.0 : 180.0;
+			}
+		}
+		 
+		//这里最大转向角超出安全限制会施加惩罚
+		angle_cost = vetorial_angle.max();
 	}
 
 	//由于暂时没有地形信息，这里只进行与最低安全飞行高度和两个相邻点的高度进行比较
-	double evaluation_route_height(de::NVectorPtr args, de::constraint_ptr high_constraint)
+	double evaluation_route_tabu_cost(de::NVectorPtr args, de::constraint_ptr high_constraint)
 	{
 		double cost;
 
@@ -153,18 +220,29 @@ public:
 
 	virtual double operator()(de::NVectorPtr args,de::constraints_ptr constraints)
 	{
-		//double x = (*args)[0].getLongitude();
-		//double y = (*args)[0].getLatitude(); 
-		//double z = (*args)[0].getAltitude();
+		double tabu_cost(0), std_variance_cost(0),mission_cost(0),survival_cost(0), length_cost(0), angle_cost(0);
+
+		NVector diff_vector(args->size() - 1, args->at[0]);
+		//DVector norms(args->size() - 1, 0);
+		std::valarray<double> norms(0.0, args->size() - 1);
+		
+
+		for (size_t i = 0; i <args->size() - 1; i++)
+		{
+			diff_vector[i] = (*args)[i + 1] - (*args)[i];
+			norms[i] = ((*args)[i + 1] - (*args)[i]).norm();
+		}
 
 		// 评估飞行高度和地形
-		double height_cost = evaluation_route_height(args,(*constraints)[3]);
+		double height_cost = evaluation_route_tabu_cost(args,(*constraints)[3]);
 		// 评估与任务点的距离
 		double mission_cost = evaluation_route_mission_cost(args, (*constraints)[4]);
 		// 评估生存代价
 		double survival_cost = evaluation_route_survival_cost(args, (*constraints)[5]);
 		//评估长度代价
-		double length_cost;
+		evaluation_length_cost(norms, length_cost);
+		//评估方差代价
+		evaluation_std_variance_cost(norms,std_variance_cost);
 		// 适应度
 		double cost = 0.1*length_cost + 0.5*survival_cost + 0.3*mission_cost + 0.1*height_cost;
 
