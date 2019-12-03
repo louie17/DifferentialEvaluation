@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
 		(*constraints)[5] = std::make_shared< real_constraint >(0, 90);//rolling angle
 
 		(*constraints)[6] = std::make_shared< real_constraint >(0, 100);//oil
+		(*constraints)[7] = std::make_shared< real_constraint >(0, 10000);//speed
 
 
 		/**

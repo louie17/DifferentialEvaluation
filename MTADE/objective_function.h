@@ -113,20 +113,34 @@ public:
 	}
 
 	/**
-	* 计算路径总长度
+	* 计算路径长度代价（归一化）
 	* 
 	* @author louie (11/28/2019)
 	*
+	* @param args[input] 每个个体的节点集合，这里只用到每段搜索路径的起始点与终止点
+	*		 norms[input] 个体各节点之间的长度值
+	*		 length_cost[output] 待计算的长度代价值
 	*/
-	void evaluation_length_cost(const std::valarray<double> &norms, double &length_cost)
+	void evaluation_length_cost(de::NVectorPtr args, const std::valarray<double> &norms, double &length_cost)
 	{
+		double route_length = 0.0;
 		for (auto iter:norms)
 		{
-			length_cost += iter;
+			route_length += iter;
 		}
+		double rate = route_length/(*(args->end()) - *(args->begin())).norm();
+		length_cost = rate>=2 ? 1.0 : rate-1;
 
 	}
 
+	/**
+	* 计算路径长度标准差代价（归一化）
+	*
+	* @author louie (11/28/2019)
+	*
+	* @param norms[input] 个体各节点之间的长度值
+	*		 std_variance_cost[output] 待计算的标准差代价值
+	*/
 	void evaluation_std_variance_cost(const std::valarray<double> &norms, double &std_variance_cost)
 	{
 		double sum = norms.sum();
@@ -140,7 +154,17 @@ public:
 		std_variance_cost = sqrt(accum / (norms.size() - 1)); //标准差
 	}
 
-	void evalution_turn_angle_cost(const de::NVector &diff_vector, const std::valarray<double> &norms, double &angle_cost)
+	/**
+	* 计算偏转角度代价（归一化）
+	*
+	* @author louie (11/28/2019)
+	*
+	* @param diff_vector[input] 个体各节点之间的差分向量
+	*		 norms[input] 个体各节点之间的长度值
+	*		 constraints[input] 含有偏航角、俯仰角、滚转角上限值的约束集合
+	*		 angle_cost[output] 待计算的长度代价值
+	*/
+	void evalution_angle_cost(const de::NVector &diff_vector, const std::valarray<double> &norms, de::constraints_ptr constraints, double &angle_cost)
 	{
 		//向量夹角
 		std::valarray<double> vetorial_angle(0.0,diff_vector.size()-1);
@@ -148,7 +172,7 @@ public:
 		std::valarray<double> yaw_angles(0.0, diff_vector.size() - 1);
 		//俯仰角pitching angle
 		std::valarray<double> pitching_angles(0.0, diff_vector.size() - 1);
-		//滚动角rolling angle
+		//滚转角rolling angle
 		std::valarray<double> rolling_angles(0.0, diff_vector.size() - 1);
 
 
@@ -157,7 +181,8 @@ public:
 			double tmp=diff_vector[i] * diff_vector[i + 1] / (norms[i] * norms[i + 1]);
 			de::Node tmpNode = diff_vector[i + 1] - diff_vector[i];
 			//以经度轴为参考轴
-			if (tmpNode.altitude()==0.0 && tmpNode.longitude()==0.0)
+			//防止atan2(double y,double x)两个参数同为0时发生域错误。虽然在MS帮助文档中申明两个参数同为0时，结果也是0，但也要预防有些低版本编译功能不支持的问题
+			if (tmpNode.altitude()==0.0 && tmpNode.longitude()==0.0) 
 			{
 				pitching_angles[i] = 0;
 			}
@@ -194,33 +219,50 @@ public:
 			}
 		}
 		 
-		//这里最大转向角超出安全限制会施加惩罚
-		angle_cost = vetorial_angle.max();
+		//这里最大转向角超出安全限制会施加惩罚,所有代价值均归一化
+		double yaw_angle_cost = (abs(yaw_angles.max) >= (*constraints)[3]->max()) ? 1.0 : 0.0;
+		double pitching_angle_cost = (abs(pitching_angles.max) >= (*constraints)[4]->max()) ? 1.0 : 0.0;
+		double rolling_angle_cost = (abs(rolling_angles.max) >= (*constraints)[5]->max()) ? 1.0 : 0.0;
+
+		//angle_cost = vetorial_angle.max();
+		angle_cost = (yaw_angle_cost>0 || pitching_angle_cost>0 || rolling_angle_cost>0) ? 1.0 : 0.0;
 	}
 
-	//由于暂时没有地形信息，这里只进行与最低安全飞行高度和两个相邻点的高度进行比较
-	double evaluation_route_tabu_cost(de::NVectorPtr args, de::constraint_ptr high_constraint)
+	/**
+	* 计算偏转角度代价（归一化）
+	*
+	* @author louie (11/28/2019)
+	*
+	* @param diff_vector[input] 个体各节点之间的差分向量
+	*		 norms[input] 个体各节点之间的长度值
+	*		 constraints[input] 含有偏航角、俯仰角、滚转角上限值的约束集合
+	*		 angle_cost[output] 待计算的长度代价值
+	*/
+	void evaluation_route_tabu_cost(de::NVectorPtr args, de::constraint_ptr high_constraint, double &tabu_cost)
 	{
-		double cost;
+		//由于暂时没有地形信息，这里只进行与最低安全飞行高度进行比较
+		std::valarray<double> heights(0.0, args->size() - 1);
+		for (size_t i=0; i<args->size();i++)
+		{
+			heights[i]=(*args)[i].altitude();
+		}
 
-		return cost;
+		tabu_cost = heights.min() > high_constraint->min() ? 0.0 : 1.0;
 	}
 
-	double evaluation_route_mission_cost(de::NVectorPtr args, de::constraint_ptr constraints)
+	void evaluation_route_mission_cost(de::NVectorPtr args, de::constraint_ptr constraints)
 	{
-		double cost;
-		return cost;
+		
 	}
 
-	double evaluation_route_survival_cost(de::NVectorPtr args, de::constraint_ptr constraints)
+	void evaluation_route_survival_cost(de::NVectorPtr args, de::constraint_ptr constraints)
 	{
-		double cost;
-		return cost;
+		
 	}
 
 	virtual double operator()(de::NVectorPtr args,de::constraints_ptr constraints)
 	{
-		double tabu_cost(0), std_variance_cost(0),mission_cost(0),survival_cost(0), length_cost(0), angle_cost(0);
+		double tabu_cost(0.0), std_variance_cost(0.0),mission_cost(0.0),survival_cost(0.0), length_cost(0.0), angle_cost(0.0);
 
 		NVector diff_vector(args->size() - 1, args->at[0]);
 		//DVector norms(args->size() - 1, 0);
@@ -234,15 +276,15 @@ public:
 		}
 
 		// 评估飞行高度和地形
-		double height_cost = evaluation_route_tabu_cost(args,(*constraints)[3]);
+		double height_cost = evaluation_route_tabu_cost(args,(*constraints)[2]);
 		// 评估与任务点的距离
 		double mission_cost = evaluation_route_mission_cost(args, (*constraints)[4]);
 		// 评估生存代价
 		double survival_cost = evaluation_route_survival_cost(args, (*constraints)[5]);
 		//评估长度代价
-		evaluation_length_cost(norms, length_cost);
+		evaluation_length_cost(args, norms, length_cost);
 		//评估方差代价
-		evaluation_std_variance_cost(norms,std_variance_cost);
+		evaluation_std_variance_cost(norms, std_variance_cost);
 		// 适应度
 		double cost = 0.1*length_cost + 0.5*survival_cost + 0.3*mission_cost + 0.1*height_cost;
 
