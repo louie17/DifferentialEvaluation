@@ -8,6 +8,8 @@
 #include "differential_evolution.hpp"
 #include "objective_function.h"
 
+#include "Scenario.hpp"
+
 using namespace de;
 
 #define VARS_COUNT 20
@@ -15,6 +17,7 @@ using namespace de;
 
 int main(int argc, char *argv[])
 {
+	sce::Scenario scenario;
 	try
 	{
 		/**

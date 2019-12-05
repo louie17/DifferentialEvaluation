@@ -121,7 +121,7 @@ public:
 	*		 norms[input] 个体各节点之间的长度值
 	*		 length_cost[output] 待计算的长度代价值
 	*/
-	void evaluation_length_cost(de::NVectorPtr args, const std::valarray<double> &norms, double &length_cost)
+	double evaluation_length_cost(de::NVectorPtr args, const std::valarray<double> &norms)
 	{
 		double route_length = 0.0;
 		for (auto iter:norms)
@@ -129,7 +129,7 @@ public:
 			route_length += iter;
 		}
 		double rate = route_length/(*(args->end()) - *(args->begin())).norm();
-		length_cost = rate>=2 ? 1.0 : rate-1;
+		return rate>=2 ? 1.0 : rate-1;
 
 	}
 
@@ -141,7 +141,7 @@ public:
 	* @param norms[input] 个体各节点之间的长度值
 	*		 std_variance_cost[output] 待计算的标准差代价值
 	*/
-	void evaluation_std_variance_cost(const std::valarray<double> &norms, double &std_variance_cost)
+	double evaluation_std_variance_cost(const std::valarray<double> &norms)
 	{
 		double sum = norms.sum();
 		double mean = sum / norms.size(); //均值  
@@ -151,7 +151,7 @@ public:
 			accum += (d - mean)*(d - mean);
 		}
 
-		std_variance_cost = sqrt(accum / (norms.size() - 1)); //标准差
+		return sqrt(accum / (norms.size() - 1)); //标准差
 	}
 
 	/**
@@ -164,7 +164,7 @@ public:
 	*		 constraints[input] 含有偏航角、俯仰角、滚转角上限值的约束集合
 	*		 angle_cost[output] 待计算的长度代价值
 	*/
-	void evalution_angle_cost(const de::NVector &diff_vector, const std::valarray<double> &norms, de::constraints_ptr constraints, double &angle_cost)
+	double evalution_angle_cost(const de::NVector &diff_vector, const std::valarray<double> &norms, de::constraints_ptr constraints)
 	{
 		//向量夹角
 		std::valarray<double> vetorial_angle(0.0,diff_vector.size()-1);
@@ -225,7 +225,7 @@ public:
 		double rolling_angle_cost = (abs(rolling_angles.max) >= (*constraints)[5]->max()) ? 1.0 : 0.0;
 
 		//angle_cost = vetorial_angle.max();
-		angle_cost = (yaw_angle_cost>0 || pitching_angle_cost>0 || rolling_angle_cost>0) ? 1.0 : 0.0;
+		return (yaw_angle_cost>0 || pitching_angle_cost>0 || rolling_angle_cost>0) ? 1.0 : 0.0;
 	}
 
 	/**
@@ -238,7 +238,7 @@ public:
 	*		 constraints[input] 含有偏航角、俯仰角、滚转角上限值的约束集合
 	*		 angle_cost[output] 待计算的长度代价值
 	*/
-	void evaluation_route_tabu_cost(de::NVectorPtr args, de::constraint_ptr high_constraint, double &tabu_cost)
+	double evaluation_route_tabu_cost(de::NVectorPtr args, de::constraint_ptr high_constraint)
 	{
 		//由于暂时没有地形信息，这里只进行与最低安全飞行高度进行比较
 		std::valarray<double> heights(0.0, args->size() - 1);
@@ -247,15 +247,31 @@ public:
 			heights[i]=(*args)[i].altitude();
 		}
 
-		tabu_cost = heights.min() > high_constraint->min() ? 0.0 : 1.0;
+		return heights.min() > high_constraint->min() ? 0.0 : 1.0;
 	}
 
-	void evaluation_route_mission_cost(de::NVectorPtr args, de::constraint_ptr constraints)
+	double evaluation_route_mission_cost(de::NVectorPtr args)
 	{
-		
+		double route_cost(0.0);
+		std::vector<double> ermc(args->size()-1,0.0);
+		for (size_t i = 0; i < args->size() - 1; i++)
+		{
+			ermc[i] = (*args->cend() - (*args)[i]).norm();
+		}
+
+		for (size_t j = 0; j < ermc.size() - 1; j++)
+		{
+			route_cost += ermc[j + 1] / ermc[j];
+		}
+		return route_cost;
 	}
 
-	void evaluation_route_survival_cost(de::NVectorPtr args, de::constraint_ptr constraints)
+	double evaluation_threat_cost(de::NVectorPtr args, sce::TVectorPtr threatLocations)
+	{
+
+	}
+
+	double evaluation_route_survival_cost(de::NVectorPtr args)
 	{
 		
 	}
@@ -276,17 +292,17 @@ public:
 		}
 
 		// 评估飞行高度和地形
-		double height_cost = evaluation_route_tabu_cost(args,(*constraints)[2]);
+		tabu_cost = evaluation_route_tabu_cost(args,(*constraints)[2]);
 		// 评估与任务点的距离
-		double mission_cost = evaluation_route_mission_cost(args, (*constraints)[4]);
+		mission_cost = evaluation_route_mission_cost(args);
 		// 评估生存代价
-		double survival_cost = evaluation_route_survival_cost(args, (*constraints)[5]);
+		survival_cost = evaluation_route_survival_cost(args);
 		//评估长度代价
-		evaluation_length_cost(args, norms, length_cost);
+		length_cost = evaluation_length_cost(args, norms);
 		//评估方差代价
-		evaluation_std_variance_cost(norms, std_variance_cost);
+		std_variance_cost = evaluation_std_variance_cost(norms);
 		// 适应度
-		double cost = 0.1*length_cost + 0.5*survival_cost + 0.3*mission_cost + 0.1*height_cost;
+		double cost = 0.1*length_cost + 0.5*survival_cost + 0.3*mission_cost + 0.1*tabu_cost;
 
 		return cost;
 	}

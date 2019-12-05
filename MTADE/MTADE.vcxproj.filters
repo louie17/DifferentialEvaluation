@@ -72,12 +72,18 @@
     <ClInclude Include="boost_threadgroup.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Scenario.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="MTADE.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenario.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

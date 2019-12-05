@@ -161,6 +161,7 @@
     <ClInclude Include="population.hpp" />
     <ClInclude Include="processors.hpp" />
     <ClInclude Include="random_generator.hpp" />
+    <ClInclude Include="Scenario.hpp" />
     <ClInclude Include="selection_strategy.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -169,6 +170,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MTADE.cpp" />
+    <ClCompile Include="Scenario.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
