@@ -17,6 +17,7 @@
 #include "de_types.hpp"
 #include "processors.hpp"
 #include "de_constraints.hpp"
+#include "Scenario.hpp"
 
 #define PI 3.14159265
 
@@ -113,7 +114,7 @@ public:
 	}
 
 	/**
-	* 计算路径长度代价（归一化）
+	* 计算路径长度代价
 	* 
 	* @author louie (11/28/2019)
 	*
@@ -128,13 +129,14 @@ public:
 		{
 			route_length += iter;
 		}
-		double rate = route_length/(*(args->end()) - *(args->begin())).norm();
-		return rate>=2 ? 1.0 : rate-1;
-
+		//归一化
+		//double rate = route_length/(*(args->end()) - *(args->begin())).norm();
+		//return rate>=2 ? 1.0 : rate-1;
+		return route_length;
 	}
 
 	/**
-	* 计算路径长度标准差代价（归一化）
+	* 计算路径长度标准差代价
 	*
 	* @author louie (11/28/2019)
 	*
@@ -150,12 +152,13 @@ public:
 		for(auto d:norms) {
 			accum += (d - mean)*(d - mean);
 		}
-
-		return sqrt(accum / (norms.size() - 1)); //标准差
+		//归一化
+		//return sqrt(accum / (norms.size() - 1))>1 ? 1-1/sqrt(accum / (norms.size() - 1)) : 0.0; //标准差
+		return sqrt(accum / (norms.size() - 1));
 	}
 
 	/**
-	* 计算偏转角度代价（归一化）
+	* 计算偏转角度代价
 	*
 	* @author louie (11/28/2019)
 	*
@@ -225,11 +228,14 @@ public:
 		double rolling_angle_cost = (abs(rolling_angles.max) >= (*constraints)[5]->max()) ? 1.0 : 0.0;
 
 		//angle_cost = vetorial_angle.max();
-		return (yaw_angle_cost>0 || pitching_angle_cost>0 || rolling_angle_cost>0) ? 1.0 : 0.0;
+		//归一化
+		//return (yaw_angle_cost>0 || pitching_angle_cost>0 || rolling_angle_cost>0) ? 1.0 : 0.0;
+
+		return abs(yaw_angles.max) + abs(pitching_angles.max) + abs(rolling_angles.max);
 	}
 
 	/**
-	* 计算偏转角度代价（归一化）
+	* 计算地形代价
 	*
 	* @author louie (11/28/2019)
 	*
@@ -240,14 +246,19 @@ public:
 	*/
 	double evaluation_route_tabu_cost(de::NVectorPtr args, de::constraint_ptr high_constraint)
 	{
+		double tabu_cost;
 		//由于暂时没有地形信息，这里只进行与最低安全飞行高度进行比较
 		std::valarray<double> heights(0.0, args->size() - 1);
 		for (size_t i=0; i<args->size();i++)
 		{
 			heights[i]=(*args)[i].altitude();
-		}
 
-		return heights.min() > high_constraint->min() ? 0.0 : 1.0;
+			tabu_cost += heights[i] - high_constraint->min();
+		}
+		//归一化
+		//return heights.min() > high_constraint->min() ? 0.0 : 1.0;
+
+		return tabu_cost;
 	}
 
 	double evaluation_route_mission_cost(de::NVectorPtr args)
@@ -266,19 +277,36 @@ public:
 		return route_cost;
 	}
 
-	double evaluation_threat_cost(de::NVectorPtr args, sce::TVectorPtr threatLocations)
+	double evaluation_threat_cost(const de::NVectorPtr args,const std::vector<std::shared_ptr<sce::Site>> &threat_sites,const DVector &weapon_range)
 	{
+		NVector t_sites(threat_sites.size(),Node());
+		for (size_t i = 0; i < t_sites.size(); i++)
+		{
+			t_sites[i](*threat_sites[i]);
+		}
 
+		constexpr double K_j = 1.0;//威胁系数
+		double threat_cost = 0.0;
+
+		for (size_t i = 0; i < args->size(); i++)
+		{
+			for (size_t j=0; j<t_sites.size();j++)
+			{
+				threat_cost += (args->at(i) - t_sites[j]).norm()<weapon_range[j] ? K_j/pow((args->at(i) - t_sites[j]).norm(),4) : 0.0;
+			}
+		}
+		
+		return threat_cost;
 	}
 
 	double evaluation_route_survival_cost(de::NVectorPtr args)
 	{
-		
+		return 0.0;
 	}
 
-	virtual double operator()(de::NVectorPtr args,de::constraints_ptr constraints)
+	virtual double operator()(de::NVectorPtr args,de::constraints_ptr constraints, const std::vector<std::shared_ptr<sce::Site>> &threat_sites, const DVector &weapon_range)
 	{
-		double tabu_cost(0.0), std_variance_cost(0.0),mission_cost(0.0),survival_cost(0.0), length_cost(0.0), angle_cost(0.0);
+		double tabu_cost(0.0), std_variance_cost(0.0),mission_cost(0.0),survival_cost(0.0), length_cost(0.0), angle_cost(0.0),threat_cost(0.0);
 
 		NVector diff_vector(args->size() - 1, args->at[0]);
 		//DVector norms(args->size() - 1, 0);
@@ -295,14 +323,20 @@ public:
 		tabu_cost = evaluation_route_tabu_cost(args,(*constraints)[2]);
 		// 评估与任务点的距离
 		mission_cost = evaluation_route_mission_cost(args);
-		// 评估生存代价
-		survival_cost = evaluation_route_survival_cost(args);
 		//评估长度代价
 		length_cost = evaluation_length_cost(args, norms);
+		//评估角度代价
+		angle_cost = evalution_angle_cost(diff_vector,norms,constraints);
 		//评估方差代价
 		std_variance_cost = evaluation_std_variance_cost(norms);
+		//评估威胁代价
+		threat_cost = evaluation_threat_cost(args, threat_sites, weapon_range);
+
+		// 评估生存代价,这在生存率评估环节做
+		//survival_cost = evaluation_route_survival_cost(args);
+
 		// 适应度
-		double cost = 0.1*length_cost + 0.5*survival_cost + 0.3*mission_cost + 0.1*tabu_cost;
+		double cost = 0.2*length_cost + 0.2*angle_cost + 0.1*mission_cost + 0.1*tabu_cost+ 0.2*std_variance_cost+0.2*threat_cost;
 
 		return cost;
 	}

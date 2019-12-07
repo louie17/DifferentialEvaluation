@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include <iostream>
 #include <memory>
+#include <cassert>
+#include <algorithm>
 
 #include "differential_evolution.hpp"
 #include "objective_function.h"
@@ -18,6 +20,33 @@ using namespace de;
 int main(int argc, char *argv[])
 {
 	sce::Scenario scenario;
+
+	//根据威胁位置获取每个威胁的最大武器射程
+	DVector wcrange(scenario.getAllSite().size(),0.0);
+
+	assert(scenario.getAllSite().size()>0);
+	assert(scenario.getAllPlatformSiteRelation().size() > 0);
+	for (size_t i=0;i<scenario.getAllSite().size();i++)
+	{
+		auto iterS = scenario.getAllSite().at(i);
+		DVector siteTmp;
+		for (auto iterPSR : scenario.getAllPlatformSiteRelation())
+		{
+			if (iterPSR.getSiteName() == iterS->getName())
+			{
+				for (auto iterPWR:scenario.getAllPlatformWeaponRelation())
+				{
+					if (iterPSR.getPlatformName()==iterPWR.getPlatformName())
+					{
+						siteTmp.push_back(iterPWR.getWeapon()->getWeaponAreaCoverage());
+					}
+				}
+			}
+		}
+		assert(siteTmp.size() > 0);
+		wcrange[i] = siteTmp.size() > 0 ? *std::max_element(siteTmp.cbegin(), siteTmp.cend()) : 0.0;		
+	}
+	
 	try
 	{
 		/**
@@ -31,9 +60,9 @@ int main(int argc, char *argv[])
 		(*constraints)[1] = std::make_shared< real_constraint >(0, 100);//depth
 		(*constraints)[2] = std::make_shared< real_constraint >(0, 20);//heigth
 
-		(*constraints)[3] = std::make_shared< real_constraint >(0, 90);//yaw angle
-		(*constraints)[4] = std::make_shared< real_constraint >(0, 90);//pitching angle
-		(*constraints)[5] = std::make_shared< real_constraint >(0, 90);//rolling angle
+		(*constraints)[3] = std::make_shared< real_constraint >(0, 60);//yaw angle
+		(*constraints)[4] = std::make_shared< real_constraint >(0, 60);//pitching angle
+		(*constraints)[5] = std::make_shared< real_constraint >(0, 60);//rolling angle
 
 		(*constraints)[6] = std::make_shared< real_constraint >(0, 100);//oil
 		(*constraints)[7] = std::make_shared< real_constraint >(0, 10000);//speed

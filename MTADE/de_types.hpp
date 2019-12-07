@@ -10,6 +10,8 @@
 #include <vector>
 #include <exception>
 
+#include "Scenario.hpp"
+
 namespace de
 {
 	/**
@@ -81,7 +83,7 @@ namespace de
 	{
 		friend bool operator==(const Node&, const Node&);
 	public:
-		Node()
+		Node(void)
 			:m_altitude(0), m_latitude(0), m_longitude(0)
 		{
 		}
@@ -107,6 +109,38 @@ namespace de
 			return *this;
 		}
 
+		Node &operator()(const sce::Site& site)
+		{
+			m_altitude = site.getAltitude();
+			m_latitude = site.getLatitude();
+			m_longitude = site.getLongitude();
+			return *this;
+		}
+
+		Node &operator()(const sce::Location& location)
+		{
+			m_altitude = location.getAltitude();
+			m_latitude = location.getLatitude();
+			m_longitude = location.getLongitude();
+			return *this;
+		}
+
+		Node &operator()(const sce::Point& point)
+		{
+			m_altitude = point.getAltitude();
+			m_latitude = point.getLatitude();
+			m_longitude = point.getLongitude();
+			return *this;
+		}
+
+		Node &operator()(const sce::WayPoint& wayPoint)
+		{
+			m_altitude = wayPoint.getAltitude();
+			m_latitude = wayPoint.getLatitude();
+			m_longitude = wayPoint.getLongitude();
+			return *this;
+		}
+
 		/**
 		* ÷ÿ‘ÿ∏≥÷µ‘ÀÀ„∑˚=
 		*
@@ -124,6 +158,37 @@ namespace de
 			return *this;
 		}
 
+		Node &operator=(const sce::Site& site)
+		{
+			m_altitude = site.getAltitude();
+			m_latitude = site.getLatitude();
+			m_longitude = site.getLongitude();
+			return *this;
+		}
+
+		Node &operator=(const sce::Location& location)
+		{
+			m_altitude = location.getAltitude();
+			m_latitude = location.getLatitude();
+			m_longitude = location.getLongitude();
+			return *this;
+		}
+
+		Node &operator=(const sce::Point& point)
+		{
+			m_altitude = point.getAltitude();
+			m_latitude = point.getLatitude();
+			m_longitude = point.getLongitude();
+			return *this;
+		}
+
+		Node &operator=(const sce::WayPoint& wayPoint)
+		{
+			m_altitude = wayPoint.getAltitude();
+			m_latitude = wayPoint.getLatitude();
+			m_longitude = wayPoint.getLongitude();
+			return *this;
+		}
 		// operations on Node objects
 		// member binary operator: left-hand operand bound to implicit this pointer
 		Node& operator+=(const Node&);

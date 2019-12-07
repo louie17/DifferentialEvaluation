@@ -288,18 +288,14 @@ namespace sce
 		std::vector<std::shared_ptr<Vertex>> m_ptrVertex;
 		//由于Platform中name数据成员为string这种可变长类型，不应直接在容器中放置类对象，而应该使用指针
 		std::vector<std::shared_ptr<Platform>> m_ptrPlatform;
-
 		std::vector<std::shared_ptr<Emitter>> m_ptrEmitter;
 		std::vector<std::shared_ptr<Weapon>> m_ptrWeapon;
-
 		std::vector<std::shared_ptr<Site>> m_ptrSite;
-		std::vector<std::shared_ptr<OwnPlatform>> m_ptrOwnPlatform;
 
+		std::vector<std::shared_ptr<OwnPlatform>> m_ptrOwnPlatform;
 		std::vector<std::shared_ptr<Esm>> m_ptrEsm;
 		std::vector<std::shared_ptr<Ecm>> m_ptrEcm;
-
-		std::vector<std::shared_ptr<Route>> m_ptrRoute;
-
+		std::vector<std::shared_ptr<Route>> m_ptrRoute; 
 		std::vector<std::shared_ptr<EsmStrategy>> m_ptrEsmStrategy;
 		std::vector<std::shared_ptr<EcmStrategy>> m_ptrEcmStrategy;
 
@@ -782,10 +778,9 @@ namespace sce
 		//请注意，数据成员中自定义类虽然都有默认构造函数，但本质上没有完全实例化类对象，
 		//由于充满不确定性，调用默认构造可能会引起一些未知错误；
 		//此构造函数用于编译器隐含调用，使用者请不要使用默认构造函数
-		//Emitter(void);
+		Emitter(void);
 		Emitter(const std::string &, std::shared_ptr<Radar_Mode>);
 		Emitter(const std::string &, std::vector<std::shared_ptr<Radar_Mode>> &);
-		~Emitter(void);
 
 		//get method
 		const std::string& getName(void) const ;
@@ -825,9 +820,8 @@ namespace sce
 	{
 	public:
 		//不用使用标准容器类直接装带有string类型成员数据的类对象，而应该是该对象的指针
-		//Weapon(void);
+		Weapon(void);
 		Weapon(const std::string&,const unsigned int&, const unsigned int&);
-		~Weapon(void);
 
 		const std::string& getName(void) const;
 		const unsigned int& getCEPR(void) const;
@@ -839,18 +833,17 @@ namespace sce
 
 
 	private:
-		std::string m_name{"Weapon 1"};
-		unsigned int m_cepr{50000};
-		unsigned int m_weaponAreaCoverage{100000};
+		std::string m_name;
+		unsigned int m_cepr;
+		unsigned int m_weaponAreaCoverage;
 	};
 
 	class Site
 	{
 	public:
 		//不用使用标准容器类直接装带有string类型成员数据的类对象，而应该是该对象的指针
-		//Site(void);
+		Site(void);
 		Site(const std::string&, const double&, const double&, const double&);
-		~Site(void);
 
 		//get latitude and longitude
 		const std::string& getName(void) const;
@@ -865,10 +858,10 @@ namespace sce
 		void setLongitude(const double &);
 
 	private:
-		std::string m_name{ "Site1" };
-		double m_altitude{ 100.0 };
-		double m_latitude{ 0.0 };
-		double m_longitude{ 0.0 };
+		std::string m_name;
+		double m_altitude;
+		double m_latitude;
+		double m_longitude;
 	};
 
 	class Point
@@ -893,11 +886,11 @@ namespace sce
 		void setTmax(const double &);
 
 	private:
-		double m_altitude{ 0.0 };
-		double m_latitude{ 0.0 };
-		double m_longitude{ 0.0 };
-		double m_tmin{ 0.0 };
-		double m_tmax{ 0.0 };
+		double m_altitude;
+		double m_latitude;
+		double m_longitude;
+		double m_tmin;
+		double m_tmax;
 	};
 	
 	enum class MissionType
@@ -912,7 +905,7 @@ namespace sce
 		//请注意，数据成员中自定义类虽然都有默认构造函数，但本质上没有完全实例化类对象，
 		//由于充满不确定性，调用默认构造可能会引起一些未知错误；
 		//此构造函数用于编译器隐含调用，使用者请不要使用默认构造函数
-		//Mission(void);
+		Mission(void);
 
 		//Mission Type:Strike
 		Mission(const MissionType&, const Point&, const Point&, const std::vector<Point>&);
@@ -949,7 +942,7 @@ namespace sce
 
 
 	private:
-		MissionType m_type = MissionType::STRIKE;
+		MissionType m_type;
 		Point m_startPoint;
 		Point m_endPoint;
 		std::vector<Point> m_targetPoints;
@@ -964,9 +957,8 @@ namespace sce
 	class OwnPlatform
 	{
 	public:
-		//OwnPlatform(void);
+		OwnPlatform(void);
 		OwnPlatform(const std::string&, const OwnPlatformType&,const double&, const double&, const double&, const double&, const double&, const double&, const Mission&);
-		~OwnPlatform(void);
 
 		const std::string& getName(void) const;
 		const OwnPlatformType& getType(void) const;
@@ -987,28 +979,26 @@ namespace sce
 		void setMaxDiveRate(const double&);
 		void setMaxSpeed(const double&);
 		void setMaxTurnRadius(const double&);
-
 		void setMission(const Mission&);
 
 
 	private:
-		std::string m_name{"Platform 1"};
-		OwnPlatformType m_type=OwnPlatformType::AIR;
-		double m_maxAcceleration{9.8};
-		double m_maxDeceleration{9.8};
-		double m_maxClimbRate{30.0};
-		double m_maxDiveRate{30.0};
-		double m_maxSpeed{340.0};
-		double m_maxTurnRadius{10000};
+		std::string m_name;
+		OwnPlatformType m_type;
+		double m_maxAcceleration;
+		double m_maxDeceleration;
+		double m_maxClimbRate;
+		double m_maxDiveRate;
+		double m_maxSpeed;
+		double m_maxTurnRadius;
 		Mission m_mission;
 	};
 
 	class Esm
 	{
 	public:
-		//Esm(void);
+		Esm(void);
 		Esm(const std::string&, const double&, const unsigned int&, const unsigned int&, const unsigned int&, const unsigned int&, const unsigned int&);
-		~Esm(void);
 
 		const std::string& getName(void);
 		const double& getDwellFreqResolution(void);
@@ -1027,13 +1017,13 @@ namespace sce
         void setNumPulsesAlarm(const unsigned int&);
 		
 	private:
-		std::string m_name{ "Esm1" };
-		double m_dwellFreqResolution{100.0};
-		unsigned int m_tuningStep{ 20 };
-		unsigned int m_rfCovMin{ 500 };
-		unsigned int m_rfCovMax{ 12000 };
-		unsigned int m_numPulsesAcquisition{200};
-		unsigned int m_numPulsesAlarm{100};
+		std::string m_name;
+		double m_dwellFreqResolution;
+		unsigned int m_tuningStep;
+		unsigned int m_rfCovMin;
+		unsigned int m_rfCovMax;
+		unsigned int m_numPulsesAcquisition;
+		unsigned int m_numPulsesAlarm;
 	};
 
 	enum class Tech
@@ -1047,12 +1037,9 @@ namespace sce
 	class Ecm
 	{
 	public:
-		//Ecm(void);
-
+		Ecm(void);
 		Ecm(const std::string&, const unsigned int&, const unsigned int&, const unsigned int&, const unsigned int&, const Tech&);
-
 		Ecm(const std::string&, const unsigned int&, const unsigned int&, const unsigned int&, const unsigned int&, const std::vector<Tech>&);
-		~Ecm(void);
 
 		const std::string& getName(void);
 		const unsigned int& getPt(void);
@@ -1092,18 +1079,18 @@ namespace sce
 		void setAllTechs(const std::vector<Tech>&);
 
 	private:
-		std::string m_name{ "Ecm1" };
-		unsigned int m_pt{ 20000 };
-		unsigned int m_gain{ 10 };
-		unsigned int m_rfMin{ 9000 };
-		unsigned int m_rfMax{ 9500 };
-		std::vector<Tech> m_techName{Tech::NOISE};
+		std::string m_name;
+		unsigned int m_pt;
+		unsigned int m_gain;
+		unsigned int m_rfMin;
+		unsigned int m_rfMax;
+		std::vector<Tech> m_techName;
 	};
 
 	class WayPoint
 	{
 	public:
-		//WayPoint(void);
+		WayPoint(void);
 		WayPoint(const unsigned int&, const double&, const double&, const double&, const double&, const double&, const double&);
 
 		//get latitude and longitude
@@ -1125,22 +1112,21 @@ namespace sce
 		void setAcceleration(const double&);
 
 	private:
-		unsigned int m_index{1};
-		double m_altitude{ 0.0 };
-		double m_latitude{ 0.0 };
-		double m_longitude{ 0.0 };
-		double m_time{ 0.0 };
-		double m_velocity{ 200.0 };
-		double m_acceleration{0.0};
+		unsigned int m_index;
+		double m_altitude;
+		double m_latitude;
+		double m_longitude;
+		double m_time;
+		double m_velocity;
+		double m_acceleration;
 	};
 
 	class Route
 	{
 	public:
-		//Route(void);
+		Route(void);
 		Route(const std::string&, const WayPoint&);
 		Route(const std::string&, const std::vector<WayPoint>&);
-		~Route(void);
 
 		//get name
 		const std::string& getName(void);
@@ -1172,14 +1158,14 @@ namespace sce
 		void setAllWayPoints(const std::vector<WayPoint>&);
 
 	private:
-		std::string m_name{"Route1"};
+		std::string m_name;
 		std::vector<WayPoint> m_wayPoints;
 	};
 
 	class Location
 	{
 	public:
-		//Location(void);
+		Location(void);
 		Location(const double&, const double&, const double&);
 
 		//get latitude and longitude
@@ -1193,15 +1179,15 @@ namespace sce
 		void setLongitude(const double &);
 
 	private:
-		double m_altitude{ 0.0 };
-		double m_latitude{ 0.0 };
-		double m_longitude{ 0.0 };
+		double m_altitude;
+		double m_latitude;
+		double m_longitude;
 	};
 
 	class DwellSquence
 	{
 	public:
-		//DwellSquence(void);
+		DwellSquence(void);
 		DwellSquence(const unsigned int&, const unsigned int&, const unsigned int&, const double&, const double&);
 
 		//get method;
@@ -1219,20 +1205,19 @@ namespace sce
 		void setEndTime(const double&);
 
 	private:
-		unsigned int m_index{ 1 };
-		unsigned int m_minFreq{ 100 };
-		unsigned int m_maxFreq{ 200 };
-		double m_startTime{ 0.0 };
-		double m_endTime{ 30.0 };
+		unsigned int m_index;
+		unsigned int m_minFreq;
+		unsigned int m_maxFreq;
+		double m_startTime;
+		double m_endTime;
 	};
 
 	class EsmStrategySection
 	{
 	public:
-		//EsmStrategySection(void);
+		EsmStrategySection(void);
 		EsmStrategySection(const double&, const double&, const Location&, const Location&, const DwellSquence&);
 		EsmStrategySection(const double&, const double&, const Location&, const Location&, const std::vector<DwellSquence>&);
-		~EsmStrategySection(void);
 
 		//get method
 		const double& getStartTime(void);
@@ -1269,8 +1254,8 @@ namespace sce
 		void setEndLocation(const Location&);
 
 	private:
-		double m_startTime{0};
-		double m_endTime{100};
+		double m_startTime;
+		double m_endTime;
 		Location m_startLocation;
 		Location m_endLocation;
 		std::vector<DwellSquence> m_dwellSquences;
@@ -1279,10 +1264,9 @@ namespace sce
 	class EsmStrategy
 	{
 	public:
-		//EsmStrategy(void);
+		EsmStrategy(void);
 		EsmStrategy(const std::string&, const std::shared_ptr<EsmStrategySection>&);
 		EsmStrategy(const std::string&, const std::vector<std::shared_ptr<EsmStrategySection>>&);
-		~EsmStrategy(void);
 
 		//get method
 		const std::string& getName(void) const;
@@ -1314,7 +1298,7 @@ namespace sce
 		void setAllPtr2Sections(std::vector<std::shared_ptr<EsmStrategySection>>&);
 
 	private:
-		std::string m_name{"ESM Strategy 1"};
+		std::string m_name;
 		std::vector<std::shared_ptr<EsmStrategySection>> m_ptrSections;
 
 	};
@@ -1323,9 +1307,8 @@ namespace sce
 	class EcmStrategySection
 	{
 	public:
-		//EcmStrategySection(void);
+		EcmStrategySection(void);
 		EcmStrategySection(const double&, const double&, const Location&, const Location&,const Tech&);
-		~EcmStrategySection(void);
 
 		//get prop
 		const double& getStartTime(void);
@@ -1342,20 +1325,19 @@ namespace sce
 		void setTechName(const Tech&);
 
 	private:
-		double m_startTime{0.0};
-		double m_endTime{100.0};
+		double m_startTime;
+		double m_endTime;
 		Location m_startLocation;
 		Location m_endLocation;
-		Tech m_tech{ Tech::NOISE };
+		Tech m_tech;
 	};
 
 	class EcmStrategy
 	{
 	public:
-		//EcmStrategy(void);
+		EcmStrategy(void);
 		EcmStrategy(const std::string&, const std::shared_ptr<EcmStrategySection>&);
 		EcmStrategy(const std::string&, const std::vector<std::shared_ptr<EcmStrategySection>>&);
-		~EcmStrategy(void);
 
 		//get method
 		const std::string& getName(void) const;
@@ -1388,19 +1370,23 @@ namespace sce
 		void setAllPtr2Sections(std::vector<std::shared_ptr<EcmStrategySection>>&);
 
 	private:
-		std::string m_name{ "ECM Strategy 1" };
+		std::string m_name;
 		std::vector<std::shared_ptr<EcmStrategySection>> m_ptrSections;
 	};
 
 	class PlatformSiteRelation
 	{
 	public:
+		//关联关系不应存在默认值
 		//PlatformSiteRelation(void);
 		PlatformSiteRelation(const std::shared_ptr<Platform>,const std::shared_ptr<Site>);
 
 		//get name;
 		const std::string& getPlatformName(void);
 		const std::string& getSiteName(void);
+
+		std::shared_ptr<Site> getSite(void);
+		std::shared_ptr<Platform> getPlatform(void);
 
 		//set/moditify pointer of Object
 		void setPlatform(const std::shared_ptr<Platform>);
@@ -1422,6 +1408,9 @@ namespace sce
 		const std::string& getPlatformName(void);
 		const std::string& getEmitterName(void);
 
+		std::shared_ptr<Platform> getPlatform(void);
+		std::shared_ptr<Emitter> getEmitter(void);
+
 		//set/moditify pointer of Object
 		void setPlatform(const std::shared_ptr<Platform>);
 		void setEmitter(const std::shared_ptr<Emitter>);
@@ -1440,6 +1429,9 @@ namespace sce
 		//get name;
 		const std::string& getPlatformName(void);
 		const std::string& getWeaponName(void);
+
+		std::shared_ptr<Platform> getPlatform(void);
+		std::shared_ptr<Weapon> getWeapon(void);
 
 		//set/moditify pointer of Object
 		void setPlatform(const std::shared_ptr<Platform>);
@@ -1460,6 +1452,9 @@ namespace sce
 		const std::string& getOwnPlatformName(void);
 		const std::string& getEsmName(void);
 
+		std::shared_ptr<OwnPlatform> getOwnPlatform(void);
+		std::shared_ptr<Esm> getEsm(void);
+
 		//set/moditify pointer of Object
 		void setOwnPlatform(const std::shared_ptr<OwnPlatform>);
 		void setEsm(const std::shared_ptr<Esm>);
@@ -1478,6 +1473,9 @@ namespace sce
 		//get name;
 		const std::string& getEsmName(void);
 		const std::string& getEsmStrategyName(void);
+
+		std::shared_ptr<EsmStrategy> getEsmStrategy(void);
+		std::shared_ptr<Esm> getEsm(void);
 
 		//set/moditify pointer of Object
 		void setEsm(const std::shared_ptr<Esm>);
@@ -1498,6 +1496,9 @@ namespace sce
 		const std::string& getOwnPlatformName(void);
 		const std::string& getEcmName(void);
 
+		std::shared_ptr<OwnPlatform> getOwnPlatform(void);
+		std::shared_ptr<Ecm> getEcm(void);
+
 		//set/moditify pointer of Object
 		void setOwnPlatform(const std::shared_ptr<OwnPlatform>);
 		void setEcm(const std::shared_ptr<Ecm>);
@@ -1517,6 +1518,9 @@ namespace sce
 		const std::string& getEcmName(void);
 		const std::string& getEcmStrategyName(void);
 
+		std::shared_ptr<EcmStrategy> getEcmStrategy(void);
+		std::shared_ptr<Ecm> getEcm(void);
+
 		//set/moditify pointer of Object
 		void setEcm(const std::shared_ptr<Ecm>);
 		void setEcmStrategy(const std::shared_ptr<EcmStrategy>);
@@ -1535,6 +1539,9 @@ namespace sce
 		//get name;
 		const std::string& getOwnPlatformName(void);
 		const std::string& getRouteName(void);
+
+		std::shared_ptr<OwnPlatform> getOwnPlatform(void);
+		std::shared_ptr<Route> getRoute(void);
 
 		//set/moditify pointer of Object
 		void setOwnPlatform(const std::shared_ptr<OwnPlatform>);
