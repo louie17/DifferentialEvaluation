@@ -137,8 +137,8 @@ namespace de
 		 *
 		 * @author louiehan (11/15/2019)
 		 *
-		 * @param varCount number of variables
-		 * @param args mutation strategy arguments
+		 * @param varCount 变量个数
+		 * @param args 变异策略参数集
 		 */
 		mutation_strategy(size_t varCount, const mutation_strategy_arguments& args)
 			: m_args(args), m_varCount(varCount)
@@ -148,7 +148,7 @@ namespace de
 		/**
 		 * 运算符（）成员返回的元组的类型。
 		 */
-		typedef std::tuple< individual_ptr, de::DVectorPtr > mutation_info;
+		typedef std::tuple< individual_ptr, de::NVectorPtr > mutation_info;
 
 		/**
 		 * 执行变异
@@ -216,8 +216,8 @@ namespace de
 		 *
 		 * @author louiehan (11/15/2019)
 		 *
-		 * @param varCount number of variables
-		 * @param args mutation strategy arguments
+		 * @param varCount 变量个数
+		 * @param args 变异策略参数集
 		 */
 		mutation_strategy_1(size_t varCount, const mutation_strategy_arguments& args)
 			: mutation_strategy(varCount, args)
@@ -240,7 +240,7 @@ namespace de
 		{
 			assert(bestIt);
 
-			de::DVectorPtr origin(std::make_shared< de::DVector >(varCount()));
+			de::NVectorPtr origin(std::make_shared< de::NVector >(varCount()));
 			individual_ptr tmpInd(std::make_shared< individual >(*pop[i]->vars()));
 			Urn urn(pop.size(), i);
 
@@ -277,8 +277,8 @@ namespace de
 		 *
 		 * @author louiehan (11/15/2019)
 		 *
-		 * @param varCount number of variables
-		 * @param args mutation strategy arguments
+		 * @param varCount 变量个数
+		 * @param args 变异策略参数集
 		 */
 		mutation_strategy_2(size_t varCount, const mutation_strategy_arguments& args)
 			: mutation_strategy(varCount, args)
@@ -301,7 +301,7 @@ namespace de
 		{
 			assert(bestIt);
 
-			de::DVectorPtr origin(std::make_shared< de::DVector >(varCount()));
+			de::NVectorPtr origin(std::make_shared< de::NVector >(varCount()));
 			individual_ptr tmpInd(std::make_shared< individual >(*pop[i]->vars()));
 			Urn urn(pop.size(), i);
 
@@ -340,8 +340,8 @@ namespace de
 		 *
 		 * @author louiehan (11/15/2019)
 		 *
-		 * @param varCount number of variables
-		 * @param args mutation strategy arguments
+		 * @param varCount 变量个数
+		 * @param args 变异策略参数集
 		 */
 		mutation_strategy_3(size_t varCount, const mutation_strategy_arguments& args)
 			: mutation_strategy(varCount, args)
@@ -364,7 +364,7 @@ namespace de
 		{
 			assert(bestIt);
 
-			de::DVectorPtr origin(std::make_shared< de::DVector >(varCount()));
+			de::NVectorPtr origin(std::make_shared< de::NVector >(varCount()));
 			individual_ptr tmpInd(std::make_shared< individual >(*pop[i]->vars()));
 			Urn urn(pop.size(), i);
 
@@ -402,8 +402,8 @@ namespace de
 		 *
 		 * @author louiehan (11/15/2019)
 		 *
-		 * @param varCount number of variables
-		 * @param args mutation strategy arguments
+		 * @param varCount 变量个数
+		 * @param args 变异策略参数集
 		 */
 		mutation_strategy_4(size_t varCount, const mutation_strategy_arguments& args)
 			: mutation_strategy(varCount, args)
@@ -426,7 +426,7 @@ namespace de
 		{
 			assert(bestIt);
 
-			de::DVectorPtr origin(std::make_shared< de::DVector >(varCount()));
+			de::NVectorPtr origin(std::make_shared< de::NVector >(varCount()));
 			individual_ptr tmpInd(std::make_shared< individual >(*pop[i]->vars()));
 			Urn urn(pop.size(), i);
 
@@ -471,8 +471,8 @@ namespace de
 		 *
 		 * @author louiehan (11/15/2019)
 		 *
-		 * @param varCount number of variables
-		 * @param args mutation strategy arguments
+		 * @param varCount 变量个数
+		 * @param args 变异策略参数集
 		 */
 		mutation_strategy_5(size_t varCount, const mutation_strategy_arguments& args)
 			: mutation_strategy(varCount, args)
@@ -495,7 +495,7 @@ namespace de
 		{
 			assert(bestIt);
 
-			de::DVectorPtr origin(std::make_shared< de::DVector >(varCount()));
+			de::NVectorPtr origin(std::make_shared< de::NVector >(varCount()));
 			individual_ptr tmpInd(std::make_shared< individual >(*pop[i]->vars()));
 			Urn urn(pop.size(), i);
 

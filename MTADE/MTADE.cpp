@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 		* 创建与初始化constraints对象
 		*
 		* 首先创建一个默认constraints对象(double type, min -1.0e6, max 1.0e6)，
-		* 然后将目标函数中的两个参数设置为实数类型：-10<=x<=10,-100<=y<=100.
+		* 然后将目标函数中的各个参数设置为实数类型：0<=y<=100.
 		*/
 		constraints_ptr constraints(std::make_shared< constraints >(VARS_COUNT, 1.0e-6, 1.0e6));
 		(*constraints)[0] = std::make_shared< real_constraint >(0, 100);//width
@@ -73,7 +73,9 @@ int main(int argc, char *argv[])
 		*
 		* 目标函数可以是任何以de :: DVectorPtr作为参数并返回双精度的函数或函子。 它可以通过引用，指针或共享指针传递。
 		*/
-		sphere_function of;
+		//sphere_function of;
+		//TODO: 开始DE算法调试工作
+		evaluation_route of;
 
 		/**
 		* 实例化两个空侦听器，一个用于差分进化，另一个用于处理器

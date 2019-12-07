@@ -120,7 +120,7 @@ namespace de
 		 *
 		 * @author louiehan (11/11/2019)
 		 *
-		 * @return de::DVectorPtr
+		 * @return de::NVectorPtr
 		 */
 		de::NVectorPtr vars() const { return m_vars; }
 

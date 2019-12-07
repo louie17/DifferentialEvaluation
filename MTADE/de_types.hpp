@@ -287,6 +287,16 @@ namespace de
 		return pnode.altitude() * lnode.altitude() + pnode.latitude() * lnode.latitude() + pnode.longitude() * lnode.longitude();
 	}
 
+	Node operator*(const double &times, const Node &pnode)
+	{
+		Node cnode(pnode);
+		cnode.setAltitude(times*pnode.altitude());
+		cnode.setLatitude(times*pnode.latitude());
+		cnode.setLongitude(times*pnode.longitude());
+
+		return cnode;
+	}
+
 	/**
 	* a vector of Node instances
 	*/
