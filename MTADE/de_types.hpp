@@ -256,12 +256,30 @@ namespace de
 	*
 	* @return node 返回差分向量
 	*/
-	Node operator-(const Node &pnode, const Node &lnode)
+	Node operator-(const Node &lnode, const Node &rnode)
+	{
+		Node node(lnode);
+		node.setAltitude(lnode.altitude() - rnode.altitude());
+		node.setLatitude(lnode.latitude() - rnode.latitude());
+		node.setLongitude(lnode.longitude() - rnode.longitude());
+		return node;
+	}
+
+	/**
+	* 重载减法运算符-
+	*
+	* @author louiehan (11/11/2019)
+	*
+	* @param pnode,site 相减的node与Site
+	*
+	* @return node 返回差分向量
+	*/
+	Node operator-(const Node &pnode, const sce::Site &site)
 	{
 		Node node(pnode);
-		node.setAltitude(pnode.altitude() - lnode.altitude());
-		node.setLatitude(pnode.latitude() - lnode.latitude());
-		node.setLongitude(pnode.longitude() - lnode.longitude());
+		node.setAltitude(pnode.altitude() - site.getAltitude());
+		node.setLatitude(pnode.latitude() - site.getLatitude());
+		node.setLongitude(pnode.longitude() - site.getLongitude());
 		return node;
 	}
 

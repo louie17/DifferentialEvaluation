@@ -14,6 +14,7 @@
 #include "boost_threadgroup.hpp"
 #include "individual.hpp"
 #include "population.hpp"
+#include "Scenario.hpp"
 
 namespace de
 {
@@ -37,6 +38,7 @@ namespace de
 		 * @param index 处理器索引
 		 */
 		virtual void start(size_t index) = 0;
+
 		/**
 		 * 在使用当前个体的变量运行目标函数之前调用
 		 *
@@ -46,6 +48,7 @@ namespace de
 		 * @param individual 运行目标函数的当前个体
 		 */
 		virtual void start_of(size_t index, individual_ptr individual) = 0;
+
 		/**
 		 * 在使用当前个体的变量运行目标函数后调用。作为参数传递的个体还具有目标函数运行结果的成本集。
 		 *
@@ -55,6 +58,7 @@ namespace de
 		 * @param individual 目标函数运行的包含代价的当前个体。
 		 */
 		virtual void end_of(size_t index, individual_ptr individual) = 0;
+
 		/**
 		 * 在运行目标函数的处理器运算符（）的末尾调用。
 		 *
@@ -65,6 +69,7 @@ namespace de
 		 * @param index the processor index
 		 */
 		virtual void end(size_t index) = 0;
+
 		/**
 		 * 如果在目标函数运行期间引发异常并指示错误，则调用。
 		 *
@@ -97,6 +102,7 @@ namespace de
 		virtual void start(size_t index)
 		{
 		}
+
 		/**
 		 * 在使用当前个体的变量运行目标函数之前调用。
 		 *
@@ -108,6 +114,7 @@ namespace de
 		virtual void start_of(size_t index, individual_ptr individual)
 		{
 		}
+
 		/**
 		 * 使用当前个体的变量运行目标函数后调用。 作为参数传递的个体也将代价设定为目标函数运行的结果。
 		 *
@@ -119,6 +126,7 @@ namespace de
 		virtual void end_of(size_t index, individual_ptr individual)
 		{
 		}
+
 		/**
 		 * 在运行目标函数的处理器operator（）的末尾调用。
 		 *
@@ -131,6 +139,7 @@ namespace de
 		virtual void end(size_t index)
 		{
 		}
+
 		/**
 		 * 如果在目标函数运行期间引发异常并指示错误，则调用。
 		 *
@@ -221,6 +230,7 @@ namespace de
 		// \cond
 		typedef T  value_type;
 		static double run(T t, de::NVectorPtr vars) { return t(vars); }
+		static double run(T t, de::NVectorPtr vars, constraints_ptr constraints, sce::Site_WeaponRange_relation swRel) { return t(vars,constraints,swRel);}
 		static T make(T t) { return t; }
 		// \endcond
 	};
@@ -236,6 +246,7 @@ namespace de
 		// \cond
 		typedef T*  value_type;
 		static double run(value_type t, de::NVectorPtr vars) { return (*t)(vars); }
+		static double run(value_type t, de::NVectorPtr vars, de::constraints_ptr constraints, sce::Site_WeaponRange_relation swRel) { return (*t)(vars, constraints, swRel); }
 		static value_type make(value_type t) { return t; }
 		// \endcond
 	};
@@ -251,6 +262,7 @@ namespace de
 		// \cond
 		typedef std::shared_ptr< T > value_type;
 		static double run(value_type t, de::NVectorPtr vars) { return (*t)(vars); }
+		static double run(value_type t, de::NVectorPtr vars, de::constraints_ptr constraints, sce::Site_WeaponRange_relation swRel) { return (*t)(vars, constraints, swRel); }
 		static value_type make(value_type t) { return t; }
 		// \endcond
 	};
@@ -266,6 +278,7 @@ namespace de
 		// \cond
 		typedef std::shared_ptr< T > value_type;
 		static double run(value_type t, de::NVectorPtr vars) { return (*t)(vars); }
+		static double run(value_type t, de::NVectorPtr vars, de::constraints_ptr constraints, sce::Site_WeaponRange_relation swRel) { return (*t)(vars, constraints, swRel); }
 		static value_type make(objective_function_factory< T >* off) { return off->make(); }
 		// \endcond
 	};
@@ -280,6 +293,7 @@ namespace de
 		// \cond
 		typedef std::shared_ptr< T > value_type;
 		static double run(value_type t, de::NVectorPtr vars) { return (*t)(vars); }
+		static double run(value_type t, de::NVectorPtr vars, de::constraints_ptr constraints, sce::Site_WeaponRange_relation swRel) { return (*t)(vars, constraints, swRel); }
 		static value_type make(std::shared_ptr< objective_function_factory< T > > off) { return off->make(); }
 		// \endcond
 	};
@@ -295,6 +309,7 @@ namespace de
 		// \cond
 		typedef std::shared_ptr< T > value_type;
 		static double run(value_type t, de::NVectorPtr vars) { return (*t)(vars); }
+		static double run(value_type t, de::NVectorPtr vars, de::constraints_ptr constraints, sce::Site_WeaponRange_relation swRel) { return (*t)(vars, constraints, swRel); }
 		static value_type make(objective_function_factory< T >& off) { return off.make(); }
 		// \endcond
 	};
@@ -313,6 +328,10 @@ namespace de
 		individual_queue& m_indQueue;
 		processor_listener_ptr m_listener;
 		size_t m_index;
+
+		constraints_ptr m_constraints;
+		sce::Site_WeaponRange_relation m_swRealation;
+
 
 		bool m_result;
 
@@ -334,6 +353,22 @@ namespace de
 		}
 
 		/**
+		* 处理器对象构造函数
+		*
+		* @author louiehan (12/11/2019)
+		*
+		* @param index 处理器索引
+		* @param of 目标函数，或目标函数工厂。接受指针、共享指针、引用
+		* @param indQueue 包含要处理的个体的队列
+		* @param listener 在处理目标函数期间将接收重要事件通知的侦听器。
+		*/
+		processor(size_t index, T of, individual_queue& indQueue, constraints_ptr constraints, sce::Site_WeaponRange_relation swRealation, processor_listener_ptr listener)
+			:m_of(processor_traits< T >::make(of)), m_indQueue(indQueue), m_constraints(constraints), m_swRealation(swRealation), m_result(false), m_listener(listener), m_index(index)
+		{
+			assert(listener);
+		}
+
+		/**
 		 * 对队列顶部的对象（如果有）运行目标函数
 		 *
 		 * @author louiehan (11/11/2019)
@@ -347,8 +382,8 @@ namespace de
 				for (individual_ptr ind = m_indQueue.pop(); ind; ind = m_indQueue.pop())
 				{
 					m_listener->start_of(m_index, ind);
-					double result = processor_traits< T >::run(m_of, ind->vars());
-
+					//double result = processor_traits< T >::run(m_of, ind->vars());
+					double result = processor_traits< T >::run(m_of, ind->vars(),m_constraints,m_swRealation);
 					ind->setCost(result);
 					m_listener->end_of(m_index, ind);
 				}

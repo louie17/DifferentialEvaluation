@@ -864,6 +864,16 @@ namespace sce
 		double m_longitude;
 	};
 
+	//重载自定义类Site的==比较操作符，默认当altitude,latitude,longitude三者相等时为同一个Site.
+	bool operator==(const Site &lsite, const Site &rsite) 
+	{
+		return lsite.getAltitude() == rsite.getAltitude() 
+		&& lsite.getLatitude() == rsite.getLatitude() 
+		&& lsite.getLongitude == rsite.getLongitude(); 
+	}
+
+	typedef std::unordered_map<std::shared_ptr<sce::Site>, unsigned int> Site_WeaponRange_relation;
+
 	class Point
 	{
 	public:

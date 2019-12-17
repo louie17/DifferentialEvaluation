@@ -16,7 +16,6 @@
 
 namespace de
 {
-
 	class individual;
 	typedef std::shared_ptr< individual > individual_ptr;
 
@@ -243,7 +242,7 @@ namespace de
 
 			for (de::NVector::size_type j = 0; j < m_vars->size(); ++j)
 			{
-				os << (*m_vars)[j].altitude() << ", "<< (*m_vars)[j].latitude()<<", "<< (*m_vars)[j].longitude()<< "\t";
+				os <<"["<< (*m_vars)[j].altitude() << ", "<< (*m_vars)[j].latitude()<<", "<< (*m_vars)[j].longitude()<< "] ";
 			}
 
 			return os.str();

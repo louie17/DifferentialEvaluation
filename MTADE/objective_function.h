@@ -61,7 +61,9 @@ public:
 	*
 	* @return double 函数代价，这是需要优化的值。
 	*/
-	virtual double operator()(de::DVectorPtr args) = 0;
+	//virtual double operator()(de::DVectorPtr args) = 0;
+	//virtual double operator()(de::NVectorPtr args) = 0;
+	virtual double operator()(de::NVectorPtr args, de::constraints_ptr constraints, const sce::Site_WeaponRange_relation swRelation) = 0;
 
 	/**
 	* An objective function has a name
@@ -277,25 +279,19 @@ public:
 		return route_cost;
 	}
 
-	double evaluation_threat_cost(const de::NVectorPtr args,const std::vector<std::shared_ptr<sce::Site>> &threat_sites,const DVector &weapon_range)
+	double evaluation_threat_cost(const de::NVectorPtr args, const sce::Site_WeaponRange_relation swRelation)
 	{
-		NVector t_sites(threat_sites.size(),Node());
-		for (size_t i = 0; i < t_sites.size(); i++)
-		{
-			t_sites[i](*threat_sites[i]);
-		}
-
 		constexpr double K_j = 1.0;//威胁系数
 		double threat_cost = 0.0;
 
 		for (size_t i = 0; i < args->size(); i++)
 		{
-			for (size_t j=0; j<t_sites.size();j++)
+			for (const auto &map_it:swRelation)
 			{
-				threat_cost += (args->at(i) - t_sites[j]).norm()<weapon_range[j] ? K_j/pow((args->at(i) - t_sites[j]).norm(),4) : 0.0;
+				double dist = (args->at(i) - *map_it.first).norm();
+				threat_cost += dist<map_it.second ? K_j / pow(dist, 4) : 0.0;
 			}
-		}
-		
+		}		
 		return threat_cost;
 	}
 
@@ -304,7 +300,7 @@ public:
 		return 0.0;
 	}
 
-	virtual double operator()(de::NVectorPtr args,de::constraints_ptr constraints, const std::vector<std::shared_ptr<sce::Site>> &threat_sites, const DVector &weapon_range)
+	virtual double operator()(de::NVectorPtr args,de::constraints_ptr constraints,const sce::Site_WeaponRange_relation swRelation)
 	{
 		double tabu_cost(0.0), std_variance_cost(0.0),mission_cost(0.0),survival_cost(0.0), length_cost(0.0), angle_cost(0.0),threat_cost(0.0);
 
@@ -330,7 +326,7 @@ public:
 		//评估方差代价
 		std_variance_cost = evaluation_std_variance_cost(norms);
 		//评估威胁代价
-		threat_cost = evaluation_threat_cost(args, threat_sites, weapon_range);
+		threat_cost = evaluation_threat_cost(args, swRelation);
 
 		// 评估生存代价,这在生存率评估环节做
 		//survival_cost = evaluation_route_survival_cost(args);

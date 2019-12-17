@@ -6,6 +6,7 @@
 #include <memory>
 #include <cassert>
 #include <algorithm>
+#include <unordered_map>
 
 #include "differential_evolution.hpp"
 #include "objective_function.h"
@@ -23,13 +24,14 @@ int main(int argc, char *argv[])
 
 	//根据威胁位置获取每个威胁的最大武器射程
 	DVector wcrange(scenario.getAllSite().size(),0.0);
+	sce::Site_WeaponRange_relation swRelation;
 
 	assert(scenario.getAllSite().size()>0);
 	assert(scenario.getAllPlatformSiteRelation().size() > 0);
 	for (size_t i=0;i<scenario.getAllSite().size();i++)
 	{
 		auto iterS = scenario.getAllSite().at(i);
-		DVector siteTmp;
+		std::vector<unsigned int> siteTmp;
 		for (auto iterPSR : scenario.getAllPlatformSiteRelation())
 		{
 			if (iterPSR.getSiteName() == iterS->getName())
@@ -44,7 +46,9 @@ int main(int argc, char *argv[])
 			}
 		}
 		assert(siteTmp.size() > 0);
-		wcrange[i] = siteTmp.size() > 0 ? *std::max_element(siteTmp.cbegin(), siteTmp.cend()) : 0.0;		
+		wcrange[i] = siteTmp.size() > 0 ? *std::max_element(siteTmp.cbegin(), siteTmp.cend()) : 0.0;
+		auto ret= swRelation.insert(std::make_pair(iterS,wcrange[i]));
+		assert(ret.second);
 	}
 	
 	try
@@ -71,10 +75,9 @@ int main(int argc, char *argv[])
 		/**
 		* 实例化目标函数
 		*
-		* 目标函数可以是任何以de :: DVectorPtr作为参数并返回双精度的函数或函子。 它可以通过引用，指针或共享指针传递。
+		* 球目标函数可以是任何以de :: DVectorPtr作为参数并返回双精度的函数或函子。 它可以通过引用，指针或共享指针传递。
 		*/
-		//sphere_function of;
-		//TODO: 开始DE算法调试工作
+		//sphere_function of;		
 		evaluation_route of;
 
 		/**
@@ -86,10 +89,10 @@ int main(int argc, char *argv[])
 		/**
 		* 用并行处理器的数量（4），目标函数和侦听器实例化处理器的集合。
 		*/
-		processors< sphere_function >::processors_ptr _processors(std::make_shared< processors< sphere_function > >(4, std::ref(of), processor_listener));
-
+		//processors< sphere_function >::processors_ptr _processors(std::make_shared< processors< sphere_function > >(4, std::ref(of), processor_listener));
+		processors< evaluation_route >::processors_ptr _processors(std::make_shared< processors< evaluation_route > >(4, std::ref(of), constraints, swRelation, processor_listener));
 		/**
-		* 实例化一个简单的终止策略，它将在10000代之后停止优化过程。
+		* 实例化一个简单的终止策略，它将在1000代之后停止优化过程。
 		*/
 		termination_strategy_ptr terminationStrategy(std::make_shared< max_gen_termination_strategy >(1000));
 
@@ -107,8 +110,8 @@ int main(int argc, char *argv[])
 		/**
 		* 使用先前定义的约束，处理器，侦听器和各种策略实例化差分进化。
 		*/
-		differential_evolution< sphere_function > de(VARS_COUNT, POPULATION_SIZE, _processors, constraints, true, terminationStrategy, selectionStrategy, mutationStrategy, listener);
-
+		//differential_evolution< sphere_function > de(VARS_COUNT, POPULATION_SIZE, _processors, constraints, true, terminationStrategy, selectionStrategy, mutationStrategy, listener);
+		differential_evolution< evaluation_route > de(VARS_COUNT, POPULATION_SIZE, _processors, constraints, true, terminationStrategy, selectionStrategy, mutationStrategy, listener);
 		/**
 		* 运行优化进程
 		*/
